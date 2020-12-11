@@ -7,8 +7,9 @@
 const app = require('../app');
 const debug = require('debug')('flying-fish-sticks-server:server');
 const http = require('http');
-const socket = require('socket.io');
-const socketEventHandler = require('../socketEventHandler');
+// const socket = require('socket.io');
+// const socketEventRouter = require('../socket/event_router');
+const io = require('../modules/io');
 
 /**
  * Get port from environment and store in Express.
@@ -30,19 +31,6 @@ var server = http.createServer(app);
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
-
-/* Init Socket.io */
-
-const io = socket(server, {
-  cors: {
-    origin: "http://localhost:3000",
-    methods: ["GET", "POST"]
-  }
-});
-
-io.on('connection', (socket) => {
-  socketEventHandler(socket)
-});
 
 /**
  * Normalize a port into a number, string, or false.
@@ -102,4 +90,5 @@ function onListening() {
     ? 'pipe ' + addr
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
+  io.init(server);
 }
