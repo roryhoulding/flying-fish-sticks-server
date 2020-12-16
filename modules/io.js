@@ -3,10 +3,6 @@ const socketEventRouter = require('../socket/event_router')
 
 let io = null;
 
-exports.getIO = () => {
-  return io;
-};
-
 exports.init = (server) => {
   io = socket(server, {
     cors: {

@@ -1,6 +1,6 @@
 const availableRooms = require('../availableRooms');
 const activeRooms = require('../activeRooms');
-const Game = require('../../modules/game'); 
+const GameRoom = require('../../modules/gameRoom'); 
 
 exports.createNewGameRoom = (socket, io) => {
   // Chek if free room available
@@ -17,11 +17,11 @@ exports.createNewGameRoom = (socket, io) => {
   // Create new game and add to activeRooms object
   // Perhaps change this from game to GameRoom class?
   // And have a game class on a game room?
-  const game = new Game(roomCode, io);
+  const gameRoom = new GameRoom(roomCode, io);
 
   // Add the game and room code to activeRooms data 
   // Each room can have 1 game
-  activeRooms[roomCode] = game;
+  activeRooms[roomCode] = gameRoom;
   
   console.log('Created new game room: ', roomCode);
 
