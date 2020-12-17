@@ -1,7 +1,7 @@
 // const EventEmitter = require('events');
 // const startingTexts = require('../data/startingTexts');
 // const getRandomInt = require('../helpers/getRandomInt');
-// const findObjectInArray = require('../helpers/findObjectInArray');
+const findObjectInArray = require('../modules/findObjectInArray');
 // const io = require('../modules/io');
 // console.log('Game io:', io);
 
@@ -45,10 +45,6 @@ module.exports = class GameRoom {
 
   setPlayer(player) {
     this.players.push(player);
-    this.io.to(this.roomCode).emit('players', {
-      players: this.players,
-      status: this.status,
-    });
   }
 
   deletePlayer(id) {
@@ -57,8 +53,13 @@ module.exports = class GameRoom {
 
     // Delete the player at playerIndex from players
     this.players.splice(playerIndex, 1)
+  }
 
-    this.io.to(this.roomCode).emit('players', this.players)
+  getPlayer(id) {
+    const playerIndex = findObjectInArray('id', id, this.players);
+
+    // Delete the player at playerIndex from players
+    return this.players[playerIndex];
   }
   
   getPlayers() {
@@ -67,6 +68,11 @@ module.exports = class GameRoom {
 
   getRoomCode() {
     return this.ROOM_CODE;
+  }
+
+  updateClients() {
+    const {io, ...data} = this;
+    this.io.to(this.ROOM_CODE).emit('roomUpdate', data);
   }
   
   // startGame() {

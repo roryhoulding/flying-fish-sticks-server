@@ -1,5 +1,7 @@
 const { createNewGameRoom } = require('./event_handlers/createNewGameRoom');
 const { attemptJoinGameRoom } = require('./event_handlers/attemptJoinGameRoom');
+const { disconnect } = require('./event_handlers/disconnect');
+const { nameChange } = require('./event_handlers/nameChange');
 
 module.exports = (socket, io) => {
   // console.log(io);
@@ -9,8 +11,15 @@ module.exports = (socket, io) => {
   });
 
   socket.on('attemptJoinGameRoom', (roomCode) => {
-    console.log(roomCode);
     attemptJoinGameRoom(socket, roomCode)
+  })
+
+  socket.on('disconnect', (reason) => {
+    disconnect(reason, socket)
+  })
+
+  socket.on('nameChange', (name) => {
+    nameChange(socket, name)
   })
 
 }

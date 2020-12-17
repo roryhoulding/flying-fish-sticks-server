@@ -25,15 +25,19 @@ exports.attemptJoinGameRoom = (socket, roomCode) => {
 
   // Init player
   const player = new Player(socket.id);
+
+  // Add player to gameRoom 
+  // This also sends the players to everyone in the gameRoom
   gameRoom.setPlayer(player);
 
+  // Set gameRoom on socket for reference when 
+  // player leaves gameRoom or disconnects
+  socket.gameRoom = roomCode;
+  
   // Player joins socket room
   // Used for emitting and broadcasting
   socket.join(roomCode);
-
-  socket.emit('attemptJoinRoomRes', {
-    roomCode: gameRoom.getRoomCode(),
-    status: gameRoom.status,
-    players: gameRoom.getPlayers(),
-  });
+  
+  // Update all players in the game room
+  gameRoom.updateClients();
 } 
