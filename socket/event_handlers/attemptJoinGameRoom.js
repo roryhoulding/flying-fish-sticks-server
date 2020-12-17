@@ -10,7 +10,7 @@ exports.attemptJoinGameRoom = (socket, roomCode) => {
 
   // Check if room exists
   if (!gameRoom) {
-    socket.emit('attemptJoinRoomRes', {doesNotExist: true});
+    socket.emit('roomDoesNotExist');
     return;
   } 
 
@@ -24,7 +24,9 @@ exports.attemptJoinGameRoom = (socket, roomCode) => {
   }
 
   // Init player
-  const player = new Player(socket.id);
+  // Takes ID and an emojiCode
+  const emoji = gameRoom.getEmoji();
+  const player = new Player(socket.id, emoji);
 
   // Add player to gameRoom 
   // This also sends the players to everyone in the gameRoom

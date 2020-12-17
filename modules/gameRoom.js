@@ -1,41 +1,25 @@
-// const EventEmitter = require('events');
-// const startingTexts = require('../data/startingTexts');
-// const getRandomInt = require('../helpers/getRandomInt');
+const Game = require('../modules/game');
 const findObjectInArray = require('../modules/findObjectInArray');
-// const io = require('../modules/io');
-// console.log('Game io:', io);
+const grabItem = require('../modules/grabItem');
+const emojiData = require('../data/emojiData');
 
 module.exports = class GameRoom {
   constructor(roomCode, io) {
     // Inherit from parent class
     
     // Constants
-    // this.ROUND_DURATION = 5;
     this.ROOM_CODE = roomCode;
-    
 
     // Classes are passed an object as a reference 
     // This will not create a new instance of io every 
     // time a new game is created
     this.io = io;
-
-    // Player object
-    // {
-    //   name:
-    //   socketID:
-    // }
+    this.availableEmojis = emojiData;
     
     // Variables
     this.players = [];
-    // this.sets = [];
     this.status = 'waiting-room'; // waiting-room or in-a-game or starting-game
-    // this.started = false;
-    // this.currentRound = {
-    //   number: 0,
-    //   timeLeft: 0,
-    //   data: {},
-    //   lastRound: false,
-    // };
+    this.currentGame = null;
   }
 
   // Player methods
@@ -74,44 +58,27 @@ module.exports = class GameRoom {
     const {io, ...data} = this;
     this.io.to(this.ROOM_CODE).emit('roomUpdate', data);
   }
+
+  createNewGame() {
+    // hide the start game button so nobody else can click it
+    // maybe send all players to loading screen?
+    if (this.currentGame && this.currentGame.started) {
+      console.log('The game has already begun');
+      return;
+    }
+    this.currentGame = new Game(this.players);
+    this.currentGame.init();
+  }
   
-  // startGame() {
-  //   if (this.started) {
-  //     console.log('The game has already begun');
-  //   }
-  //   if (!this.started) {
-  //     // There needs to be one set and one round per player
-  //     // for the game to work correctly
-  //     const numPlayers = this.players.length;
+  startGame() {
+    if (this.status === 'in-a-game') return;
+    this.status = 'in-a-game';
+    this.currentGame.start();
+  }
 
-  //     // Generate each set
-  //     for (let i = 0; i < numPlayers; i++) {
-  //       const set = []
-        
-  //       // Generate the round data for the current set
-  //       for (let j = 0; j < numPlayers; j++) {
-  //         const roundData = {
-  //           inputType: j % 2 === 0 ? 'text' : 'drawing',
-  //           outputType: j % 2 === 0 ? 'drawing' : 'text',
-  //           playerID: this.players[(i + j) % numPlayers].id,
-  //         }
-  //         if (j === 0) {
-  //           const randomInt = getRandomInt(0, startingTexts.length - 1);
-  //           roundData.inputData = startingTexts[randomInt];
-  //         }
-  //         set.push(roundData)
-  //       }
-
-  //       // Add this sets to the games sets
-  //       this.sets.push(set);
-  //     }
-  //     this.started = true;
-  //     console.log('let the games begin');
-  //     console.log(this.io);
-  //     this.io.to(this.roomCode).emit('gameStarted');
-  //     this.nextRound();
-  //   }
-  // }
+  getEmoji() { 
+    return grabItem(this.availableEmojis);
+  }
 
   // nextRound() {
   //   // Incrememnt round and reset the currentRound variable

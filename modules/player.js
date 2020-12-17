@@ -1,6 +1,7 @@
 module.exports = class Player {
-  constructor(id, name) {
+  constructor(id, emoji, name) {
     this.id = id;
+    this.emoji = emoji;
     this.name = name ? name : null;
   }
 
