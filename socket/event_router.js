@@ -3,6 +3,7 @@ const { attemptJoinGameRoom } = require('./event_handlers/attemptJoinGameRoom');
 const { disconnect } = require('./event_handlers/disconnect');
 const { nameChange } = require('./event_handlers/nameChange');
 const { startGame } = require('./event_handlers/startGame');
+const { readyForRound } = require('./event_handlers/readyForRound');
 
 module.exports = (socket, io) => {
   // console.log(io);
@@ -27,4 +28,7 @@ module.exports = (socket, io) => {
     startGame(socket.gameRoom);
   })
 
+  socket.on('readyForRound', () => {
+    readyForRound(socket.id, socket.gameRoom)
+  })
 }

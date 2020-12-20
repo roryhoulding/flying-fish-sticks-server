@@ -1,10 +1,11 @@
 const startingTexts = require('../data/startingTexts');
 const getRandomInt = require('../modules/getRandomInt');
+const EventEmitter = require('events');
 
-const { set } = require("../app");
-
-module.exports = class Game {
+module.exports = class Game extends EventEmitter {
   constructor(players) {
+    super();
+
     // Constants
     this.ROUND_DURATION = 10;
     
@@ -14,18 +15,17 @@ module.exports = class Game {
       timeLeft: 0,
       data: {},
       lastRound: false,
+      playersReady: [],
     };
+
     this.players = players;
     this.sets = [];
     this.started = false;
   }
-
-  start() {
-    if (this.started) return;
-    this.started = true;
-  }
   
   init() {
+    this.started = true;
+
     const numPlayers = this.players.length;
 
     // Generate the first round for each set
@@ -37,21 +37,44 @@ module.exports = class Game {
         data: startData,
       })
     }
+
+    // Set up the first round
+    this.setNextRound()
   }
 
-  nextRound() {
+  setNextRound() {
+    // Set round data
     this.currentRound = {
       number: this.currentRound.number += 1,
       timeLeft: this.ROUND_DURATION,
       data: {},
       lastRound: this.currentRound.lastRound,
+      playersReady: [],
     }
 
-    console.log(`Round ${this.currentRound.number}`);
-
+    // If this is the last round, set lastRound to be true
     if (this.currentRound.number === this.players.length) {
       this.currentRound.lastRound = true;
       console.log('last round');
     }
   }
+
+  setPlayerReady(player) {
+    const { playersReady } = this.currentRound;
+    playersReady.push(player);
+  }
+
+  startRound() {
+    // Start the countdown and the round begins
+    const interval = setInterval(() => {
+      this.currentRound.timeLeft--;
+      this.emit('timeLeftChange', this.currentRound.timeLeft);
+      if (this.currentRound.timeLeft === 0) {
+        clearInterval(interval);
+        // this.endRound();
+        console.log('End of timer');
+      }
+    }, 1000);
+  }
+
 }

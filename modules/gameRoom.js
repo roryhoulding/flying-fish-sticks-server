@@ -14,15 +14,14 @@ module.exports = class GameRoom {
     // This will not create a new instance of io every 
     // time a new game is created
     this.io = io;
-    this.availableEmojis = emojiData;
     
     // Variables
+    this.availableEmojis = emojiData;
     this.players = [];
     this.status = 'waiting-room'; // waiting-room or in-a-game or starting-game
     this.currentGame = null;
   }
 
-  // Player methods
   test() {
     this.io.emit('test')
   }
@@ -36,10 +35,11 @@ module.exports = class GameRoom {
     const playerIndex = findObjectInArray('id', id, this.players);
 
     // Delete the player at playerIndex from players
-    this.players.splice(playerIndex, 1)
+    this.players.splice(playerIndex, 1);
   }
 
   getPlayer(id) {
+    // Find the player by the ID passed as a parameter
     const playerIndex = findObjectInArray('id', id, this.players);
 
     // Delete the player at playerIndex from players
@@ -54,13 +54,28 @@ module.exports = class GameRoom {
     return this.ROOM_CODE;
   }
 
-  updateClients() {
+  updateClients(options) {
+    // Set the data to send to the clients to this object
+    // minus this.io, otherwise it triggers a circular error
     const {io, ...data} = this;
+
+    // Can be passed an optional options parameter
+    // The only option at the moment is requiresResponse
+    // This lets the client know that they need to responsd
+    // To trigger an event on the server
+    // E.g. it might be 'readyForRound' which let's the server know
+    // that the player is in sync and ready for the next round to start
+    if (options) {
+      const { requiresResponse } = options;
+      if (requiresResponse) data.requiresResponse = requiresResponse;
+    }
+
+    // Send data to clients in this gameRoom
     this.io.to(this.ROOM_CODE).emit('roomUpdate', data);
   }
 
   createNewGame() {
-    // hide the start game button so nobody else can click it
+    // TODO: hide the start game button so nobody else can click it
     // maybe send all players to loading screen?
     if (this.currentGame && this.currentGame.started) {
       console.log('The game has already begun');
@@ -70,7 +85,7 @@ module.exports = class GameRoom {
     this.currentGame.init();
   }
   
-  startGame() {
+  startCurrentGame() {
     if (this.status === 'in-a-game') return;
     this.status = 'in-a-game';
     this.currentGame.start();
